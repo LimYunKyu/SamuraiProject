@@ -1,0 +1,21 @@
+공격후 일정 시간동안 공격키를 누르지 않으면 맨 처음부터 다시 공격 시작
+
+
+8방향에 따라서 회전 
+
+상태에 따라서 행동하는걸로 변경
+
+상태
+IDLE
+ATTACK_IDLE
+EQUIP
+UNEQUIP
+WALK
+RUN
+ATTACK
+HIT
+
+
+IDLE상태에서 할수 있는것
+이동, 공격
+
