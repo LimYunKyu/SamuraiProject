@@ -36,8 +36,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     float comboDelay = 0.2f;
     bool isAttacking = false;
-   
 
+    Transform attackEffect;
+    float effectStartFrame = 0;
+    float effectEndFrame = 0;
 
     //Animation
     Animator animator;
@@ -278,7 +280,8 @@ public class PlayerController : MonoBehaviour
             StartCoroutine(ComboAttack());
             coCheckingComboDelay = StartCoroutine(CheckingCurrentComboDelay());
         }
-       
+
+        
     }
 
 
@@ -390,4 +393,6 @@ public class PlayerController : MonoBehaviour
         }
 
     }
+
+  
 }
