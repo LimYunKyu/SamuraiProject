@@ -1,21 +1,7 @@
-공격후 일정 시간동안 공격키를 누르지 않으면 맨 처음부터 다시 공격 시작
+지금 공격후에 계속해서 battle idle상태이니까
 
+3초 지나면 Idle 상태로 돌아간다.
 
-8방향에 따라서 회전 
+근데 3초 지나지 않으면 그 3초동안은 걷다가 멈춰도 battle idle상태가 되어야한다.
 
-상태에 따라서 행동하는걸로 변경
-
-상태
-IDLE
-ATTACK_IDLE
-EQUIP
-UNEQUIP
-WALK
-RUN
-ATTACK
-HIT
-
-
-IDLE상태에서 할수 있는것
-이동, 공격
 

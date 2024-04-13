@@ -10,9 +10,7 @@ public class PlayerController : MonoBehaviour
     enum PLAYER_STATE
     { 
         IDLE,
-        ATTACK_IDLE,
-        EQUIP,
-        UNEQUIP,
+        ATTACK_IDLE,     
         WALK,
         RUN,
         ATTACK,
@@ -37,10 +35,6 @@ public class PlayerController : MonoBehaviour
     float comboDelay = 0.2f;
     bool isAttacking = false;
 
-    Transform attackEffect;
-    float effectStartFrame = 0;
-    float effectEndFrame = 0;
-
     //Animation
     Animator animator;
 
@@ -58,6 +52,7 @@ public class PlayerController : MonoBehaviour
     //Coroutine
 
     Coroutine coCheckingComboDelay;
+    Coroutine coBattleTimeCheck;
 
 
     //Key
@@ -70,8 +65,9 @@ public class PlayerController : MonoBehaviour
 
     bool keyLButton = false;
 
-   
-
+    // Battle
+    float battleTime = 3f;
+    bool isBattle = false;
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
@@ -94,10 +90,6 @@ public class PlayerController : MonoBehaviour
             case PLAYER_STATE.ATTACK_IDLE:
                 UpdateAttackIdle();
                 break;
-            case PLAYER_STATE.EQUIP:
-                break;
-            case PLAYER_STATE.UNEQUIP:
-                break;
             case PLAYER_STATE.WALK:
             case PLAYER_STATE.RUN:
                 UpdateMove();
@@ -110,10 +102,6 @@ public class PlayerController : MonoBehaviour
                 break;
 
         }
-
-        SyncAnimationTransform();
-
-
     }
 
 
@@ -170,16 +158,22 @@ public class PlayerController : MonoBehaviour
             SetState(PLAYER_STATE.ATTACK);
         }
 
+        if (!isBattle)
+        {
+
+            SetState(PLAYER_STATE.IDLE);
+
+
+        }
+
     }
 
 
     void UpdateMove()
     {
-        if (isAttacking)
-        {
-            SyncAnimationTransform();
-            return;
-        }
+
+        if (keyA || keyS || keyD || keyW)
+            SyncCameraHolderRotation();
 
         if (keyLButton)
         {
@@ -214,10 +208,14 @@ public class PlayerController : MonoBehaviour
         transform.position += moveDir * speed * Time.deltaTime;
 
         if (moveDir == Vector3.zero)
-            SetState(PLAYER_STATE.ATTACK_IDLE);
-        else
-            SyncCameraHolderRotation();
-
+        {
+            if(!isBattle)
+                SetState(PLAYER_STATE.IDLE);
+            else
+                SetState(PLAYER_STATE.ATTACK_IDLE);
+        }
+      
+          
     }
     
 
@@ -275,70 +273,24 @@ public class PlayerController : MonoBehaviour
         if (!isAttacking)
         {
 
+
+
             if(coCheckingComboDelay != null)
                 StopCoroutine(coCheckingComboDelay);
+            if (coBattleTimeCheck != null)
+                StopCoroutine(coBattleTimeCheck);
+
+
             StartCoroutine(ComboAttack());
+
             coCheckingComboDelay = StartCoroutine(CheckingCurrentComboDelay());
+
+            
         }
 
         
     }
 
-
-    IEnumerator ComboAttack()
-    {
-        isAttacking = true;
-        
-
-        switch (currentAttackNum)
-        {
-            case 0:
-                animator.Play("COMBO_ATTACK_0");
-                break;
-            case 1:
-                animator.Play("COMBO_ATTACK_1");
-                break;
-            case 2:
-                animator.Play("COMBO_ATTACK_2");
-                break;
-            case 3:
-                animator.Play("COMBO_ATTACK_3");
-                break;
-        }
-        currentAttackNum++;
-        currentAttackNum = currentAttackNum % 4;
-
-
-        yield return new WaitForSeconds(attackDelay);
-
-        animator.CrossFade("ATTACK_IDLE0", 0.1f);
-        yield return new WaitForSeconds(0.1f);
-        SetState(PLAYER_STATE.ATTACK_IDLE); 
-        isAttacking = false;
-        
-        
-    }
-
-    IEnumerator CheckingCurrentComboDelay()
-    { 
-
-        yield return new WaitForSeconds(comboDelay + attackDelay + 0.1f);
-
-        currentAttackNum = 0;
-      
-
-    }
-    void SyncAnimationTransform()
-    {
-
-        //애니메이션 모델이랑 동기화
-
-        Vector3 posOffset = animator.transform.localPosition;
-        transform.position += posOffset;
-        animator.transform.localPosition = Vector3.zero;
-
-        //Quaternion rotOffset = animator.transform.localRotation;
-    }
 
     void SyncCameraHolderRotation()
     {
@@ -363,14 +315,7 @@ public class PlayerController : MonoBehaviour
             case PLAYER_STATE.ATTACK_IDLE:
                 playerState = PLAYER_STATE.ATTACK_IDLE;
                 animator.CrossFade("ATTACK_IDLE0", 0.2f);
-                break;
-            case PLAYER_STATE.EQUIP:
-                playerState = PLAYER_STATE.EQUIP;
-                animator.CrossFade("EQUIP", 0.2f);
-                break;
-            case PLAYER_STATE.UNEQUIP:
-                playerState = PLAYER_STATE.UNEQUIP;
-                animator.CrossFade("UNEQUIP", 0.2f);
+                coBattleTimeCheck = StartCoroutine(CheckBattleTime());
                 break;
             case PLAYER_STATE.WALK:
                 playerState = PLAYER_STATE.WALK;
@@ -382,10 +327,14 @@ public class PlayerController : MonoBehaviour
                 break;
             case PLAYER_STATE.ATTACK:
                 playerState = PLAYER_STATE.ATTACK; 
+
                 if (coCheckingComboDelay != null)
                     StopCoroutine(coCheckingComboDelay);
                 StartCoroutine(ComboAttack());
                 coCheckingComboDelay = StartCoroutine(CheckingCurrentComboDelay());
+                if(coBattleTimeCheck != null)
+                StopCoroutine(coBattleTimeCheck);
+
                 break;
             case PLAYER_STATE.HIT:
                 playerState = PLAYER_STATE.HIT;
@@ -394,5 +343,55 @@ public class PlayerController : MonoBehaviour
 
     }
 
-  
+    ///코루틴
+    IEnumerator ComboAttack()
+    {
+        isAttacking = true;
+
+
+        switch (currentAttackNum)
+        {
+            case 0:
+                animator.Play("COMBO_ATTACK_0");
+                break;
+            case 1:
+                animator.Play("COMBO_ATTACK_1");
+                break;
+            case 2:
+                animator.Play("COMBO_ATTACK_2");
+                break;
+            case 3:
+                animator.Play("COMBO_ATTACK_3");
+                break;
+        }
+        currentAttackNum++;
+        currentAttackNum = currentAttackNum % 4;
+
+
+        yield return new WaitForSeconds(attackDelay);
+
+        animator.CrossFade("ATTACK_IDLE0", 0.1f);
+        yield return new WaitForSeconds(0.1f);
+        SetState(PLAYER_STATE.ATTACK_IDLE);
+        isAttacking = false;
+
+
+    }
+    IEnumerator CheckingCurrentComboDelay()
+    {
+
+        yield return new WaitForSeconds(comboDelay + attackDelay + 0.1f);
+
+        currentAttackNum = 0;
+
+
+    }
+
+    IEnumerator CheckBattleTime()
+    {
+        isBattle = true;
+        yield return new WaitForSeconds(battleTime);
+        isBattle = false;
+
+    }
 }
