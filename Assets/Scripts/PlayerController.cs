@@ -55,7 +55,7 @@ public class PlayerController : MonoBehaviour
     Coroutine coBattleTimeCheck;
 
 
-    //Key
+    //Key Press
 
     bool keyW = false;
     bool keyA = false;
@@ -65,6 +65,9 @@ public class PlayerController : MonoBehaviour
 
     bool keyLButton = false;
 
+
+    //Key Down
+    bool dKeyW = false;
     // Battle
     float battleTime = 3f;
     bool isBattle = false;
@@ -273,8 +276,6 @@ public class PlayerController : MonoBehaviour
         if (!isAttacking)
         {
 
-
-
             if(coCheckingComboDelay != null)
                 StopCoroutine(coCheckingComboDelay);
             if (coBattleTimeCheck != null)
@@ -297,8 +298,8 @@ public class PlayerController : MonoBehaviour
 
         Vector3 _dir = new Vector3(cameraHolder.transform.forward.x, 0, cameraHolder.transform.forward.z);
         _dir.Normalize();
-        transform.rotation = Quaternion.LookRotation(_dir);
-
+        transform.rotation = Quaternion.LookRotation(_dir);      
+        //cameraHolder.GetComponent<CameraHolderController>()._angle.y = 0;
 
 
     }
@@ -332,6 +333,7 @@ public class PlayerController : MonoBehaviour
                     StopCoroutine(coCheckingComboDelay);
                 StartCoroutine(ComboAttack());
                 coCheckingComboDelay = StartCoroutine(CheckingCurrentComboDelay());
+
                 if(coBattleTimeCheck != null)
                 StopCoroutine(coBattleTimeCheck);
 

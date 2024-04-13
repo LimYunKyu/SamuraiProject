@@ -8,14 +8,14 @@ public class CameraHolderController : MonoBehaviour
 {
 
 
-    Vector3 _angle = Vector3.zero;
+    public Vector3 _angle = Vector3.zero;
     Vector3 _preMousePos = Vector3.zero;
     Vector3 _currentMousePos = Vector3.zero;
     Vector3 _forwardVec = Vector3.zero;
 
-    float _clampDown = -89f;
+    public float _clampDown = -89f;
 
-    float _clapmUP = 89f;
+    public float _clapmUP = 89f;
     Transform _parent;
     PlayerController _playerController;
     void Start()
@@ -50,12 +50,15 @@ public class CameraHolderController : MonoBehaviour
 
     void LateUpdate()
     {
+      
         Quaternion rotation = Quaternion.Euler(CalcAngleUsedMousePos());
         transform.rotation = rotation;
-        _forwardVec = transform.forward;
+        //_forwardVec = transform.forward;
 
-        ApplyHolderForward();
-       
+        //ApplyHolderForward();
+
+        Debug.Log(_angle);
+        
     }
     void ApplyHolderForward()
     {
