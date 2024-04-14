@@ -57,7 +57,7 @@ public class CameraHolderController : MonoBehaviour
 
         //ApplyHolderForward();
 
-        Debug.Log(_angle);
+       
         
     }
     void ApplyHolderForward()

@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour
 
 
     //PlayerState
-    enum PLAYER_STATE
+    public enum PLAYER_STATE
     { 
         IDLE,
         ATTACK_IDLE,     
@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
     Vector3 moveDir = Vector3.zero;
 
     [SerializeField]
-    float speed = 5f;
+    float speed = 2f;
 
     float angle = 0f;
 
@@ -46,7 +46,7 @@ public class PlayerController : MonoBehaviour
 
     //STATE
 
-    PLAYER_STATE playerState = PLAYER_STATE.IDLE;
+    public PLAYER_STATE playerState = PLAYER_STATE.IDLE;
 
 
     //Coroutine
@@ -126,10 +126,12 @@ public class PlayerController : MonoBehaviour
             if (keyLShift)
             {
                 SetState(PLAYER_STATE.RUN);
+                
             }
             else
             {
                 SetState(PLAYER_STATE.WALK);
+              
             }
         }
 
@@ -141,17 +143,19 @@ public class PlayerController : MonoBehaviour
 
 
     }
-
+ 
     void UpdateAttackIdle()
     {
         if (keyW || keyA || keyS || keyD)
         {
             if (keyLShift)
             {
+                
                 SetState(PLAYER_STATE.RUN);
             }
             else
             {
+                
                 SetState(PLAYER_STATE.WALK);
             }
         }
@@ -174,9 +178,22 @@ public class PlayerController : MonoBehaviour
 
     void UpdateMove()
     {
-
+        Debug.Log(keyLShift);
         if (keyA || keyS || keyD || keyW)
+        {
             SyncCameraHolderRotation();
+            if (keyLShift && playerState != PLAYER_STATE.RUN)
+            {
+                
+                SetState(PLAYER_STATE.RUN);
+            }
+            else if (!keyLShift && playerState != PLAYER_STATE.WALK)
+            {
+               
+                SetState(PLAYER_STATE.WALK);
+            }
+            
+        }
 
         if (keyLButton)
         {
@@ -305,8 +322,9 @@ public class PlayerController : MonoBehaviour
     }
 
     void SetState(PLAYER_STATE state)
-    { 
-        switch(state) 
+    {
+        int a;
+        switch (state) 
         {
 
             case PLAYER_STATE.IDLE:
@@ -319,12 +337,14 @@ public class PlayerController : MonoBehaviour
                 coBattleTimeCheck = StartCoroutine(CheckBattleTime());
                 break;
             case PLAYER_STATE.WALK:
+                speed = 2f;
                 playerState = PLAYER_STATE.WALK;
-                animator.CrossFade("WALK", 0.2f);
+                animator.CrossFade("WALK", 0.1f);
                 break;
             case PLAYER_STATE.RUN:
+                speed = 5f;
                 playerState = PLAYER_STATE.RUN;
-                animator.CrossFade("RUN", 0.2f);
+                animator.CrossFade("RUN", 0.1f);
                 break;
             case PLAYER_STATE.ATTACK:
                 playerState = PLAYER_STATE.ATTACK; 
@@ -362,12 +382,10 @@ public class PlayerController : MonoBehaviour
             case 2:
                 animator.Play("COMBO_ATTACK_2");
                 break;
-            case 3:
-                animator.Play("COMBO_ATTACK_3");
-                break;
+          
         }
         currentAttackNum++;
-        currentAttackNum = currentAttackNum % 4;
+        currentAttackNum = currentAttackNum % 3;
 
 
         yield return new WaitForSeconds(attackDelay);
@@ -396,4 +414,6 @@ public class PlayerController : MonoBehaviour
         isBattle = false;
 
     }
+
+   
 }
