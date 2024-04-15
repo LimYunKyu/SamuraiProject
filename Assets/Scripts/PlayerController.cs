@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -26,6 +27,8 @@ public class PlayerController : MonoBehaviour
 
     float angle = 0f;
 
+
+    float currentYangle = 0f;
     //Player Attack
 
     int currentAttackNum = 0;
@@ -40,7 +43,7 @@ public class PlayerController : MonoBehaviour
 
 
     //ChildObjcet
-    Transform modelChild;
+    //Transform modelChild;
     Transform cameraHolder;
 
 
@@ -73,8 +76,8 @@ public class PlayerController : MonoBehaviour
     bool isBattle = false;
     void Start()
     {
-        animator = GetComponentInChildren<Animator>();
-        modelChild = animator.transform;
+        animator = GetComponent<Animator>();
+        //modelChild = animator.transform;
         cameraHolder = GetComponentInChildren<CameraHolderController>().transform;
     }
 
@@ -105,8 +108,10 @@ public class PlayerController : MonoBehaviour
                 break;
 
         }
-    }
 
+
+        
+    }
 
     void InputChecking()
     { 
@@ -178,7 +183,7 @@ public class PlayerController : MonoBehaviour
 
     void UpdateMove()
     {
-        Debug.Log(keyLShift);
+        moveDir = Vector3.zero;
         if (keyA || keyS || keyD || keyW)
         {
             SyncCameraHolderRotation();
@@ -192,7 +197,8 @@ public class PlayerController : MonoBehaviour
                
                 SetState(PLAYER_STATE.WALK);
             }
-            
+
+            moveDir = transform.forward;
         }
 
         if (keyLButton)
@@ -204,24 +210,24 @@ public class PlayerController : MonoBehaviour
 
         currentAttackNum = 0;
 
-        moveDir = Vector3.zero;
+        //moveDir = Vector3.zero;
 
-        if (keyW)
-        {
-            moveDir += transform.forward;
-        }
-        if (keyA)
-        {
-            moveDir -= transform.right;
-        }
-        if (keyD)
-        {
-            moveDir += transform.right;
-        }
-        if (keyS)
-        {
-            moveDir -= transform.forward;
-        }
+        //if (keyW)
+        //{
+        //    moveDir += transform.forward;
+        //}
+        //if (keyA)
+        //{
+        //    moveDir -= transform.right;
+        //}
+        //if (keyD)
+        //{
+        //    moveDir += transform.right;
+        //}
+        //if (keyS)
+        //{
+        //    moveDir -= transform.forward;
+        //}
 
         moveDir.Normalize();
 
@@ -247,35 +253,35 @@ public class PlayerController : MonoBehaviour
 
         if (keyW && keyD)
         {
-            angle = 45;
+            angle = currentYangle + 45;
         }
         else if (keyS && keyD)
         {
-            angle = 135;
+            angle = currentYangle + 135;
         }
         else if (keyS && keyA)
         {
-            angle = 225;
+            angle = currentYangle + 225;
         }
         else if (keyW && keyA)
         {
-            angle = 315;
+            angle = currentYangle + 315;
         }
         else if (keyW)
         {
-            angle = 0;
+            angle = currentYangle + 0;
         }
         else if (keyD)
         {
-            angle = 90;
+            angle = currentYangle + 90;
         }
         else if (keyS)
         {
-            angle = 180;
+            angle = currentYangle + 180;
         }
         else if (keyA)
         {
-            angle = 270;
+            angle = currentYangle + 270;
         }
         else
         {
@@ -284,8 +290,9 @@ public class PlayerController : MonoBehaviour
 
         Vector3 _angle = new Vector3(0, angle, 0);
 
-        modelChild.localRotation = Quaternion.Slerp(modelChild.transform.localRotation, Quaternion.Euler(_angle), 40 * Time.deltaTime);
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(_angle), 40 * Time.deltaTime);
 
+        
     }
     void Attack()
     {
@@ -315,7 +322,8 @@ public class PlayerController : MonoBehaviour
 
         Vector3 _dir = new Vector3(cameraHolder.transform.forward.x, 0, cameraHolder.transform.forward.z);
         _dir.Normalize();
-        transform.rotation = Quaternion.LookRotation(_dir);      
+        //transform.rotation = Quaternion.LookRotation(_dir);
+        currentYangle = cameraHolder.rotation.eulerAngles.y;
         //cameraHolder.GetComponent<CameraHolderController>()._angle.y = 0;
 
 
@@ -342,7 +350,7 @@ public class PlayerController : MonoBehaviour
                 animator.CrossFade("WALK", 0.1f);
                 break;
             case PLAYER_STATE.RUN:
-                speed = 5f;
+                speed = 7f;
                 playerState = PLAYER_STATE.RUN;
                 animator.CrossFade("RUN", 0.1f);
                 break;
