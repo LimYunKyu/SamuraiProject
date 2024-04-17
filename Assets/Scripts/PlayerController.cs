@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class PlayerController : MonoBehaviour
 {
@@ -38,6 +39,9 @@ public class PlayerController : MonoBehaviour
     float comboDelay = 0.2f;
     bool isAttacking = false;
 
+
+    Transform attackTarget = null;
+
     //Animation
     Animator animator;
 
@@ -45,6 +49,9 @@ public class PlayerController : MonoBehaviour
     //ChildObjcet
     //Transform modelChild;
     Transform cameraHolder;
+
+    //Collider
+    SphereCollider sphereCollider;
 
 
     //STATE
@@ -77,8 +84,10 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
-        //modelChild = animator.transform;
+       sphereCollider = GetComponent<SphereCollider>();
         cameraHolder = GetComponentInChildren<CameraHolderController>().transform;
+
+
     }
 
 
@@ -299,8 +308,8 @@ public class PlayerController : MonoBehaviour
 
         if (!isAttacking)
         {
-
-            if(coCheckingComboDelay != null)
+            RotationToEnemy();
+            if (coCheckingComboDelay != null)
                 StopCoroutine(coCheckingComboDelay);
             if (coBattleTimeCheck != null)
                 StopCoroutine(coBattleTimeCheck);
@@ -309,6 +318,7 @@ public class PlayerController : MonoBehaviour
             StartCoroutine(ComboAttack());
 
             coCheckingComboDelay = StartCoroutine(CheckingCurrentComboDelay());
+
 
             
         }
@@ -327,6 +337,46 @@ public class PlayerController : MonoBehaviour
         //cameraHolder.GetComponent<CameraHolderController>()._angle.y = 0;
 
 
+    }
+
+    void RotationToEnemy()
+    {
+        if (attackTarget) {
+
+            Vector3 targetDirection = attackTarget.position - transform.position;
+            targetDirection.y = 0;
+            transform.rotation = Quaternion.LookRotation(targetDirection);
+        
+        }
+
+
+    }
+
+
+    private void OnTriggerStay(Collider other)
+    {
+
+        float distance = 0;
+        if (other.tag == "Monster")
+        { 
+            distance = Vector3.Distance(other.transform.position, transform.position);
+
+            if (attackTarget)
+            {
+                float currentDist = Vector3.Distance(attackTarget.transform.position, transform.position);
+                if (distance < currentDist)
+                {
+                    attackTarget = other.transform;
+                }
+            }
+            else
+            {
+
+                attackTarget = other.transform;
+            }
+        
+        
+        }
     }
 
     void SetState(PLAYER_STATE state)
@@ -355,16 +405,16 @@ public class PlayerController : MonoBehaviour
                 animator.CrossFade("RUN", 0.1f);
                 break;
             case PLAYER_STATE.ATTACK:
-                playerState = PLAYER_STATE.ATTACK; 
+                playerState = PLAYER_STATE.ATTACK;
 
-                if (coCheckingComboDelay != null)
-                    StopCoroutine(coCheckingComboDelay);
-                StartCoroutine(ComboAttack());
-                coCheckingComboDelay = StartCoroutine(CheckingCurrentComboDelay());
+                //if (coCheckingComboDelay != null)
+                //    StopCoroutine(coCheckingComboDelay);
+                //StartCoroutine(ComboAttack());
+                //coCheckingComboDelay = StartCoroutine(CheckingCurrentComboDelay());
 
-                if(coBattleTimeCheck != null)
-                StopCoroutine(coBattleTimeCheck);
-
+                //if(coBattleTimeCheck != null)
+                //StopCoroutine(coBattleTimeCheck);
+                Attack();
                 break;
             case PLAYER_STATE.HIT:
                 playerState = PLAYER_STATE.HIT;

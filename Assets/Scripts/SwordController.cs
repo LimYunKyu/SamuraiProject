@@ -23,7 +23,13 @@ public class SwordController : MonoBehaviour
         if (other.tag == "Monster")
         {
             if (playerController.playerState == PlayerController.PLAYER_STATE.ATTACK)
-                Debug.Log(other.name);
+            {
+                GameObject obj = Resources.Load<GameObject>("Prefabs/Particle/Hits/Hit_02");
+                GameObject newInstance = Instantiate(obj, other.ClosestPointOnBounds(transform.position), Quaternion.identity);
+               // Debug.Log(other.name);
+
+            }
+                
         }
     }
 }

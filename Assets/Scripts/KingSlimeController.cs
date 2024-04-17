@@ -19,7 +19,8 @@ public class KingSlimeController : MonoBehaviour
     }
 
 
-    bool isTracking = false;
+  
+    bool isRangeInSphere = false;
     [SerializeField]
     float attackDistance = 1f;
 
@@ -74,30 +75,45 @@ public class KingSlimeController : MonoBehaviour
     }
     void UpdateIdle()
     {
-
         float dist = Vector3.Distance(transform.position, target.position);
-        
-
-        if (dist < attackDistance)
+        if (isRangeInSphere)
         {
 
-            SetState(KINGSLIME_STATE.JUMP);
-
-        }
-        else if (dist > attackDistance)
-        {
-            Vector3 targetPos = target.position;
-
-            if (nav.enabled)
+            if (dist < attackDistance)
             {
+                LookPlayer();
+                int index = 0;
+                index = Random.Range(0, 3);
+               
+                switch (index)
+                {
+                    case 0:
+                    case 1:
+                        SetState(KINGSLIME_STATE.ATTACK);
+                        break;
+                    case 2:
+                        SetState(KINGSLIME_STATE.JUMP);
+                        break;
+                }
+            }
+            else if (dist > attackDistance)
+            {
+                Vector3 targetPos = target.position;
+                
+                if (nav.enabled)
+                {
+                    SetState(KINGSLIME_STATE.MOVE);
+                    nav.SetDestination(targetPos);
+                    nav.isStopped = false;
 
-                nav.SetDestination(targetPos);
-                nav.isStopped = false;
+                }
 
             }
 
-        }
 
+
+        }
+ 
     }
 
     void UpdateMove()
@@ -107,8 +123,25 @@ public class KingSlimeController : MonoBehaviour
         if (dist < attackDistance)
         {
 
-            SetState(KINGSLIME_STATE.ATTACK);
-            isTracking = false;
+            int index = 0;
+            index = Random.Range(0, 3);
+            Vector3 dir = target.position - transform.position;
+            dir.y = 0;
+            transform.rotation = Quaternion.LookRotation(dir);
+            LookPlayer();
+            switch (index)
+            {
+                case 0:
+                case 1:
+                    SetState(KINGSLIME_STATE.ATTACK);
+                    break;
+                case 2:
+                    SetState(KINGSLIME_STATE.JUMP);
+                    break;
+
+
+            }
+           // isTracking = false;
             nav.isStopped = true;
         }
 
@@ -204,12 +237,24 @@ public class KingSlimeController : MonoBehaviour
 
     }
 
+    void LookPlayer()
+    { 
+        
+        Vector3 dist = target.position - transform.position;
+        dist.y = 0;
+        
+        transform.rotation = Quaternion.LookRotation(dist);
+
+
+
+    }
+
     void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Player")
         {
-
-            isTracking = true;
+            isRangeInSphere = true;
+           
             SetState(KINGSLIME_STATE.MOVE);
 
         }
@@ -220,7 +265,9 @@ public class KingSlimeController : MonoBehaviour
         if (other.tag == "Player")
         {
 
-            isTracking = false;
+            isRangeInSphere = false;
+           
+            nav.isStopped = true;
             SetState(KINGSLIME_STATE.IDLE);
 
         }
