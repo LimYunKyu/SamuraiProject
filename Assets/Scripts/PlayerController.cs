@@ -1,7 +1,9 @@
+using Palmmedia.ReportGenerator.Core.CodeAnalysis;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
 
 public class PlayerController : MonoBehaviour
@@ -28,6 +30,18 @@ public class PlayerController : MonoBehaviour
 
     float angle = 0f;
 
+    float height = 0f;
+
+    [SerializeField]
+    float downDistance = 0.5f;
+
+    [SerializeField]
+    float forwardDistance = 0.5f;
+
+    [SerializeField]
+    float rayBoxSize = 1f;
+
+    bool isMoving = true;
 
     float currentYangle = 0f;
     //Player Attack
@@ -118,10 +132,41 @@ public class PlayerController : MonoBehaviour
 
         }
 
+        Vector3 pos;
+        if (BlockDownChecking(out pos))
+        {
+            //transform.position = new Vector3(transform.position.x, pos.y, transform.position.z);
+            //Debug.Log(pos);
 
-        
+        }
+
+         transform.position = new Vector3(transform.position.x, height, transform.position.z);
     }
 
+
+    void LateUpdate()
+    {
+        Vector3 fowardPos;
+        if (!BlockForwardChecking(out fowardPos))
+        {
+
+            isMoving = true;
+        }
+        else
+        {
+
+            isMoving = false;
+        }
+       
+
+        Vector3 pos;
+        if (BlockDownChecking(out pos))
+        {
+            transform.position = new Vector3(transform.position.x, height, transform.position.z);
+        }
+
+       
+    }
     void InputChecking()
     { 
         keyW = Input.GetKey(KeyCode.W);
@@ -192,6 +237,8 @@ public class PlayerController : MonoBehaviour
 
     void UpdateMove()
     {
+
+
         moveDir = Vector3.zero;
         if (keyA || keyS || keyD || keyW)
         {
@@ -219,27 +266,10 @@ public class PlayerController : MonoBehaviour
 
         currentAttackNum = 0;
 
-        //moveDir = Vector3.zero;
-
-        //if (keyW)
-        //{
-        //    moveDir += transform.forward;
-        //}
-        //if (keyA)
-        //{
-        //    moveDir -= transform.right;
-        //}
-        //if (keyD)
-        //{
-        //    moveDir += transform.right;
-        //}
-        //if (keyS)
-        //{
-        //    moveDir -= transform.forward;
-        //}
-
         moveDir.Normalize();
 
+        
+        if(isMoving)
         transform.position += moveDir * speed * Time.deltaTime;
 
         if (moveDir == Vector3.zero)
@@ -423,6 +453,55 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    bool BlockDownChecking(out Vector3 hitPos)
+    {
+      
+        Vector3 rayPos = transform.position;
+        rayPos.y += 0.5f;
+
+        LayerMask mask = 1 << LayerMask.NameToLayer("Floor");
+        RaycastHit hit;
+        Debug.DrawRay(rayPos, Vector3.down, Color.red);
+        if (Physics.Raycast(rayPos,Vector3.down,out hit, downDistance, mask))
+        {
+
+            hitPos = hit.point;
+            //Debug.Log(hit.transform.name);
+            height = hit.point.y;
+            return true;
+        
+        }
+        hitPos = transform.position;
+        return false;
+    }
+
+
+    bool BlockForwardChecking(out Vector3 hitPos)
+    {
+        
+        Vector3 rayPos = transform.position;
+        rayPos.y += 0.5f;
+
+        LayerMask mask = 1 << LayerMask.NameToLayer("Floor");
+        RaycastHit hit;
+        Vector3 size = new Vector3(rayBoxSize, rayBoxSize,rayBoxSize); // 박스의 크기
+        Debug.DrawRay(rayPos, transform.forward, Color.red);
+        if (Physics.BoxCast(rayPos, size/2f,transform.forward, out hit, Quaternion.identity,forwardDistance,  mask))
+        {
+            Debug.Log("앞부디침");
+            hitPos = hit.point;
+            return true;
+            
+        }
+        else
+        {
+            Debug.Log("앞 안부디침");
+        
+        }
+
+        hitPos = hit.point;
+        return false; 
+    }
     ///코루틴
     IEnumerator ComboAttack()
     {
