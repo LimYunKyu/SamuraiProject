@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: corner-with-borders
       objectReference: {fileID: 0}
+    - target: {fileID: 100002, guid: 3230bf240b33fb94e8270d86f9e59098, type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 3230bf240b33fb94e8270d86f9e59098, type: 3}
       propertyPath: m_LocalScale.x
       value: 10
